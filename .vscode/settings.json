@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.soultpl": "php",
+        "*.tcc": "cpp",
+        "iostream": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "utility": "cpp"
+    }
+}
