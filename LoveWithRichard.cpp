@@ -1,4 +1,4 @@
-//encoding: gbk
+//encoding: gb18030
 
 #include<iostream>
 #include<conio.h>
@@ -36,7 +36,7 @@ void gotoxy(int x,int y) {
  * @brief 更改输出字体颜色
  * @param a 同color指令的格式，请在cmd中输入help color查看
  */
-void color(unsigned char a = 0x0f) {
+void color(unsigned char a = 0x07) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), a);
 }
 
@@ -67,7 +67,7 @@ void p(string str, string end = "\n\n") {
     color();
     for (int i = 0; str[i] != '\0'; i++) // 设置字体颜色符
         if (str[i] == '\x11')
-            color((int)str[++i]);
+            color(str[++i]);
         else if (str[i] == '\x12') // 重置字体颜色符
             color();
         else {
@@ -113,7 +113,7 @@ void g(string str, string end = "\n\n") {
  */
 void w(float lovePoint = -10000) {
     system("cls");
-    p("\n\n\n\n\n\n\n\n\n\n\t\t\tLove With Richard \x11\x07 under epidemic", "\n");
+    p("\n\n\n\n\n\n\n\n\n\n\t\t\t\x11\x0fLove With Richard \x11\x07 under epidemic", "\n");
     if (lovePoint != -10000) {
         cout << "\t\t\t";
         color(0x5c);
@@ -143,7 +143,7 @@ unsigned char choices(const string *choiceArr) {
             size = j;
             break;
         }
-        p("* " + choiceArr[j], "\t\t");
+        p("\x11\x0f* " + choiceArr[j], "\t\t");
     }
     while (true) {
         gotoxy(x, y);
@@ -189,7 +189,7 @@ unsigned char choicesV(const string *choiceArr) {
             size = j;
             break;
         }
-        p("* " + choiceArr[j]);
+        p("\x11\x0f* " + choiceArr[j], "\n"); 
     }
     while (true) {
         gotoxy(x, y);
@@ -238,30 +238,24 @@ string keyboard() {
     int x = wherex(), y = wherey();
     unsigned char size = 255;
     unsigned char pos = 0;
-    char n[7] = {0, 0, 0, 0, 0, 0, 0};
-
-    cout << "\n\t";
+    char n[] = "\0\0\0\0\0\0";
     for (unsigned char j = 0; j < size; j++) {
-        if (j > 0 && j % 7 == 0)
-            cout << "\n\t";
         if (CHOICES_KEYBOARD[j] == "") {
             size = j;
             break;
         }
-        color(j >= 26 ? 0x08 : 0x0f);
-        cout << CHOICES_KEYBOARD[j] << "\t";
-        color();
     }
     while (true) {
         gotoxy(x, y);
+        color(0x0f);
         cout << "\t\t\t     " << n << "      \n\t";
         for (unsigned char j = 0; j < size; j++) {
             if (j > 0 && j % 7 == 0)
                 cout << "\n\t";
             color((i == j ? 0x0e : 0x0f) - (j >= 26 && pos == 0 ? 8 : 0));
             cout << CHOICES_KEYBOARD[j] << '\t';
-            color();
         }
+        color();
         g = getch();
         if (g == '\xe0') {
             g = getch();
@@ -275,16 +269,10 @@ string keyboard() {
                     i++;
                 else
                     i = 0;
-            else if (g == 'H')
-                if (i >= 7)
+            else if (g == 'H' && i >= 7)
                     i -= 7;
-                else
-                    i += 21;
-            else if (g == 'P')
-                if (i < size - 7)
+            else if (g == 'P' && i < size - 7)
                     i += 7;
-                else
-                    i -= 21;
         }
         else if (g == '\r')
             if (i == 26) {
@@ -296,11 +284,9 @@ string keyboard() {
             else if(i == 27) {
                 if (pos == 0)
                     continue;
-                pos++;
-                n[pos] = 0;
                 color();
                 cout << endl;
-                return n;
+                return string(&n[0]);
             }
             else {
                 if (pos > 5)
@@ -315,23 +301,21 @@ int main() {
 
     // 主菜单
 
-    const string CHOICES_MAINMENU[] = {"开始", "设置", "关于", ""};
+    const string CHOICES_MAINMENU[] = {"开始", "关于", "退出", ""};
     const string CHOICES_BACK[] = {"返回", ""};
 
     restart:
-    l("\n      |     \x11\x0c/\\ /\\\x12 l     j  -----   l        j --- -------  |     |\n      |    \x11\x0c|##V##|\x12 l   j  |_____    l      j   |     |     |_____|\n      |     \x11\x0c\\###/\x12   l j   |          l /\\ j    |     |     |     |\n      |____   \x11\x0cv\x12      V    |_____      V  V    _|_    |     |     |\n\n         ____     ___      ____            _     ____    ____\n        |     \\    |     /      |     |  /   \\  |     \\ |     \\\n        |      )   |    |       |_____| |     | |      )|      |\n        |_____/    |    |       |     | |-----| |_____/ |      |\n        |     \\    |    |       |     | |     | |     \\ |      |   \x11\x07under\n\x12        |      |  _|_    \\_____ |     | |     | |      ||_____/\x11\x07 epidemic\n\n\n                    \x11\x0eStory by Richard     \x11\x0aProgram by Roy\n\n\n");
+    l("\n\x11\x0f      |     \x11\x0c/\\ /\\\x11\x0f l     j  -----   l        j --- -------  |     |\n      |    \x11\x0c|##V##|\x11\x0f l   j  |_____    l      j   |     |     |_____|\n      |     \x11\x0c\\###/\x11\x0f   l j   |          l /\\ j    |     |     |     |\n      |____   \x11\x0cv\x11\x0f      V    |_____      V  V    _|_    |     |     |\n\n         ____     ___      ____            _     ____    ____\n        |     \\    |     /      |     |  /   \\  |     \\ |     \\\n        |      )   |    |       |_____| |     | |      )|      |\n        |_____/    |    |       |     | |-----| |_____/ |      |\n        |     \\    |    |       |     | |     | |     \\ |      |   \x11\x07under\n\x11\x0f        |      |  _|_    \\_____ |     | |     | |      ||_____/\x11\x07 epidemic\n\n\n");
     Sleep(1000);
-    l("\x11\x08按方向键移动，按回车选定");
+    l("按方向键移动，按回车选定");
     back:
     switch(choices(CHOICES_MAINMENU)) {
         case 1:
-            p("没有设置（？");
+            p("\t\t\t\x11\x0fLove With Richard \x11\x07 under epidemic\n\n\n\n\t\t原作（Python 3） by:\n\t\t\t\t\x11\x08 学了一点Python的\n\t\t\t\t     \x11\x0eRichard M\x12\n\t\t    （Bilibili \x11\x09@天府灵山行者\x12 , \x11\x09uid300711293\x12）\n\n\n\t\tC++ 翻制 by:\n\t\t\t\t\x11\x08  除了C++啥都会的\n\t\t\t\t       \x11\x0aRoy L\x12\n\t\t      （Bilibili \x11\x09@DGCK81LNN\x12 , \x11\x09uid328066747\x12）\n\t\t\t     \x11\x02（胡说，我根本不会Java");
             choices(CHOICES_BACK);
             goto back;
         case 2:
-            p("啊这\x07");
-            choices(CHOICES_BACK);
-            goto back;
+            return 0;
     }
 
     // 初始化
@@ -383,7 +367,7 @@ int main() {
 
     g("我一边跟在他后面，一边思考要对他说什么。我和他按照老师的引导进入了七年八班的教室，也就是两年前我们上课的地方。");
     g("他擦了自己的桌椅，然后拿出一本必背古诗文，趴在桌子上看。");
-    p("* (要对他说什么？)");
+    p("\x11\x0f* (要对他说什么？)");
     switch (choices(CHOICES_START)) {
     case 0:
         lovePoint += loveBonus * 10;
@@ -464,10 +448,10 @@ int main() {
     g("根据和Richard关系比较好的一个男生讲的，他在两年前的这个时候就已经靠近Sunny。那时我还完全在自己的小圈子里。");
     g("直到18年的428春季运动会。那一天，他拿着一个神秘的“八班加油”，还不让大家看夹在里面的内容。他的哥们儿还对我说过：“那天早上，Sunny莫名其妙地坐在了他身边。”");
     g("那天下午，他的事被几个女生揭开了。我的疑惑也解开了。自此之后，他开始疯狂地追求Sunny，但一直无果，持续了两三个月，然后他开始玩“暗示流”。每一次，他的言语都能逗笑我。");
-    g("关注“小武事件”后，我开始对他有了一丝兴趣。到了初二以后，他的学习成绩开始猛涨，甚至进了年级前十；而他变得更加内向了，只和固定的两三个男生说话。");
+    g("关注“Sunny事件”后，我开始对他有了一丝兴趣。到了初二以后，他的学习成绩开始猛涨，甚至进了年级前十；而他变得更加内向了，只和固定的两三个男生说话。");
     g("他这种怪异的性格更吸引了我的注意，但那时他似乎总是回忆着旧情而且排斥异性。我怕自己被他拒绝，就没能鼓起勇气与他交往。");
     g("广播结束，下课了。他走出了教室的后门。我好奇地跟了出去。他在走廊里徘徊了一圈，然后进入了我们班曾经于此上课的小教室。");
-    p("* (要跟着他吗？)");
+    p("\x11\x0f* (要跟着他吗？)");
     switch (choices(CHOICES_FOLLOW)) {
     case 0:
         lovePoint += loveBonus * 5;
@@ -482,7 +466,7 @@ int main() {
         else {
             g("他慢慢地转过身来，看着我说：“这里有我两年前留下的痕迹。看到这些东西，我就会想起那时候的事情，心里会畅快些。”");
             g("我把与涂鸦墙的回忆分享给了他：“我还记得，七年级时咱们班里的柱子上全是字，被称作表白墙。我还在上面写过我的偶像呢。”");
-            p("* (要对他说什么？)");
+            p("\x11\x0f* (要对他说什么？)");
             switch (choices(CHOICES_MEMORY)) {
             case 0:
                 lovePoint += loveBonus * 20;
@@ -538,7 +522,7 @@ int main() {
     const string CHOICES_PHONE[] = {"赶紧复习", "你在看什么呢", "不去打扰他", ""};
 
     g("2020.4.23。我进班时，已经有一半的同学来了。Richard居然没有像前几天一样写古诗文小本，他在看手机。");
-    p("* (要对他说什么？)");
+    p("\x11\x0f* (要对他说什么？)");
     switch (choices(CHOICES_PHONE)) {
     case 0:
         lovePoint += loveBonus * 3;
@@ -584,13 +568,13 @@ int main() {
 
     const string CHOICES_THAT_CLASSROOM_1[] = {"你在看什么呢", "咱俩一起走吧", ""};
     const string CHOICES_THAT_CLASSROOM_2[] = {"为什么在这里上课", "那一天发生了什么", ""};
-    const string CHOICES_AFTER_SCHOOL[] = {"再陪他一会儿", "出门右拐", ""};
+    const string CHOICES_AFTER_SCHOOL[] = {"跟着他", "出门右拐", ""};
 
     g("2020.4.24。倒春寒已经退去两天了。今天的午后，外面已经很温暖了。");
     g("然而，我为了吸引Richard的目光，早上就脱下了外套，完全露出里面的短袖校服。这样被凉到也值了。");
     g("今天下午，Richard在班里消毒擦地。我去楼下办公室找了老师一趟，遗憾地错过了帮他的机会。老师给我讲完后，我立刻从西侧楼梯跑上了四楼。");
     g("我急急忙忙地跑进了班，发现他已经不在了。迅速地背起书包，我立刻出去找他。他居然在初中楼四楼最东侧的备用教室旁呆呆的站着。");
-    p("* (要对他说什么？)");
+    p("\x11\x0f* (要对他说什么？)");
     switch (choices(CHOICES_THAT_CLASSROOM_1)) {
     case 0:
         g("我走了过去，问他：“Richard，你在看什么呢？”");
@@ -631,7 +615,7 @@ int main() {
     }
     g("我不声不响地跟在他身边，从初中楼走出来，左转，向大门走去。他在走的时候总是向左右张望，而且速度比往常慢。");
     g("离大门还有约二十多米时，他突然回头看向我，用温厚的嗓音和我道别：“"+name+"再见！”");
-    g("“Richard再见!”");
+    g("“再见!”");
     p("走出大门后，他左转了，向着地铁站的方向走去。而我的家长则在大门右侧等我。");
     switch (choices(CHOICES_AFTER_SCHOOL)) {
     case 0:
@@ -657,7 +641,7 @@ int main() {
     // 06 - 四·二八
 
     const string CHOICES_GO_TO_PLACE[] = {"报国亭", "体育馆", "他刚才一直凝视的地方...？", ""};
-    const string CHOICES_PAVILION[] = {"趁四周无人，起身然后坐到他的身边", "趁四周无人，起身然后坐到他的腿上", ""};
+    const string CHOICES_PAVILION[] = {"坐到他的身边", "坐到他的腿上", ""};
     const string CHOICES_REMOTE[] = {"坐到他的右边", "坐到他的腿上", "坐到他的左边", ""};
 
     g("2020.4.28。明天就考试了，可我还是有点心虚。这几天，我虽然问了Richard许多难题，但没基本听懂他的方法，只享受了和喜欢的人在一起的感觉。");
@@ -667,14 +651,14 @@ int main() {
     g("Richard站在跑道起跑线的旁边，一动不动的站着，面向操场拦网后的一扇紧锁的小门。他的奇怪行为又一次发作了。");
     g("我准备利用自由活动的时间，给他一个惊喜:我与他的幽会。我向他走了过去，邀请他：“Hey，Richard！我想带你去校园里走一走，怎么样？”");
     g("“好的，我现在没有什么事。你想去哪就去哪吧。”他侧过脸来，用余光看着我。我想一下了，觉得有三处地点他会喜欢。");
-    p("* (要去哪里？)");
+    p("\x11\x0f* (要去哪里？)");
     switch (choices(CHOICES_GO_TO_PLACE)) {
     case 0:
         lovePoint += loveBonus * 20;
         g("我向操场出口走去，准备前往我最喜欢停留的地方——报国亭。他则跟在我后边，一声不吭。我不经意间的一回头，发现他还在看着操场拦网与高中楼中间的那片空地。");
         g("我们来到报国亭上，我坐在了背对初中楼的一边。他则在我的对面缓缓地坐下，但他并没有看着我，而且没主动说话。");
-        p("* (要怎么做？)");
-        switch (choicesV(CHOICES_PAVILION)) {
+        p("\x11\x0f* (趁四周无人，起身...)");
+        switch (choices(CHOICES_PAVILION)) {
         case 0:
             g("我向四周环顾了一遍，四周无人，就立刻起身，坐到了他的身边。他没有对我做什么亲密的小动作，也没有反抗。");
             break;
@@ -692,7 +676,7 @@ int main() {
         g("我趁机给他一个邀约：“以后，我想多带你来这里。下次，我会送你一把钢尺，听听你亲手弹的曲子。”");
         g("他答应了：“行。我还想了解一下你是怎么喜欢上我的。你为什么现在才开始追我？”");
         g("“我可以给你说说，但你一会也要告诉我你为什么喜欢Sunny，而且被拒后一直不放弃。”");
-        g("“刚入学时，我并没有关注过你。两年前“小武事件”发生后，我开始对你有了一丝兴趣。到了初二以后，你的学习成绩开始猛涨，甚至进了年级前十，每次考试你的理科成绩都数一数二。”");
+        g("“刚入学时，我并没有关注过你。两年前“Sunny事件”发生后，我开始对你有了一丝兴趣。到了初二以后，你的学习成绩开始猛涨，甚至进了年级前十，每次考试你的理科成绩都数一数二。”");
         g("“我对你的理科很崇拜，想让你亲自教我。你对她这种专一的感情更吸引了我的注意。但那时你变得更加内向了，而且排斥异性。我怕被你拒绝，就没能鼓起勇气与你交往。”");
         g("“在漫长而无聊的网课期间，我总是想起你，但还是不敢主动联系。我做了艰难的思想斗争，决定利用初三的最后时间去和你交往。无论你喜不喜欢我，我行动了，就不会后悔。”");
         if (lovePoint >= 80 && loveBonus > 1) {
@@ -740,8 +724,8 @@ int main() {
         g("“那时，你还很孤傲、内向，完全不愿多说一句话。我也就没再继续接触你。”");
         g("走着走着，他停在了那扇紧锁的小门前，然后他坐在了那门前的几级台阶上，向前面的空地上看着。");
         g("我回头看了看，其他男生多在操场上打球，还有一些人在练习中考项目，当然也有偷懒的。没有一个人在看着我们所在的‘偏僻’地方。");
-        p("* (要怎么做？)");
-        switch (choicesV(CHOICES_REMOTE)) {
+        p("\x11\x0f* (要怎么做？)");
+        switch (choices(CHOICES_REMOTE)) {
         case 0:
             lovePoint += loveBonus * 5;
             g("我贴着他宽大的身躯，坐在了他的右边。他看向我，说：“两年前的今天，Sunny就是像你这样主动坐在了我的左边。哎，那一次反常的接近却成了离别的开始。”");
@@ -766,14 +750,14 @@ int main() {
         g("“起初，我坐在第一排从左往右数第一个。但很快，写加油稿的把我赶走，我来到了第二排。不知等了多久，Sunny来了，她莫名其妙地坐在了我的右边。”");
         g("“那时，我认为她坐在我身边就是在向我发暗号。所以，我在上午的初一女子400米时就去给她加油举牌，位置就在终点线边上。”");
         g("“在那个明媚的上午，我拿着牌子，跟在她后面来到体育馆门口的检录处。然后我高举牌子，在起跑线旁边呐喊‘八班加油’。发令枪响后，她瞬间冲了出去，我留在原地远望着操场另一头的她。”");
-        g("“当她快进入最后一个直道时，我高举并挥舞手中的‘八班加油’;她最后冲刺时，我抽走了上面的‘八班加油’，露出了底下的‘Sunny加油’。”");
+        g("“当她快进入最后一个直道时，我高举并挥舞手中的‘八班加油’；她最后冲刺时，我抽走了上面的‘八班加油’，露出了底下的‘Sunny加油’。”");
         g("“比赛结束后，她没来和我说话。我回了自己的座位，她基本没再坐在我身旁。我记得，她的成绩并不太理想。”");
         g("“中午，我去体育馆找她，她在和Shirley打羽毛球。这次我有些害羞了，没敢过去和她一起打。天气有些热了，我拿两张牌子当扇子用。”");
         g("“下午的初一女子800米，我再次入场给她加油，流程和上午差不多，她却再一次冷落了我。但是，我回到观众席时，却被班上的几个女生叫住了。”");
         g("“她们反复问我‘你是不是喜欢Sunny？’之类的问题。我否认了几次，她们不让，最后我承认了我喜欢Sunny。”");
         g("“放学时，Sunny也没有理我。此后，她开始与我越走越远，但我一直喜欢着她。哎，我真的没想到，我最期待的一次运动会竟成了漫长而曲折的离别的开端。”");
         g("“自从那时起，我对其他女生不再有兴趣。即使我觉得某个女生比她还可爱，我也只是看两眼，然后不吭声地走开。我对其他人，尤其是女生，的防备之心增加了不少。”");
-        g("我赶紧开导他：“有些人注定要走，想留都留不住;有些人注定要来，想躲都躲不了。好好珍惜当下的人和事，不要留下遗憾。”");
+        g("我赶紧开导他：“有些人注定要走，想留都留不住；有些人注定要来，想躲都躲不了。好好珍惜当下的人和事，不要留下遗憾。”");
         g("他只是小声地耳语了一句：“好的，我会试着改变自己。”");
         break;
     }
@@ -859,17 +843,13 @@ int main() {
         g("我孤身一人走出了校门，上车，回了家。到家后，我又给他发了一次消息，想要把他挽留在我身边。");
         g("他回复了我：“一切都回不去了。”之后，整个五一假期，他都没与我聊天。");
         w(lovePoint);
-        p("\n\x11\x08Bad End:永远的回忆");
+        p("\x11\x08\nBad End:永远的回忆"); // “\x08Bad”在我的环境下无法通过编译，特把“\n”移到后面来隔开
     }
 
     // 结束菜单
 
-    const string CHOICES_ENDMENU[] = {"结束", "退出", ""};
+    const string CHOICES_ENDMENU[] = {"结束", ""};
 
-    switch (choices(CHOICES_ENDMENU)) {
-        case 0:
-            goto restart;
-        default:
-            return 0;
-    }
+    choices(CHOICES_ENDMENU);
+    goto restart;
 }
