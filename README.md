@@ -6,9 +6,12 @@
 
 C++ 翻制 by [RoyL / DGCK81LNN](https://space.bilibili.com/328066747)
 
-* [64位release](/LoveWithRichard.exe)
-* [勉强编译出的32位release](/LoveWithRichard_gcc32.exe)
+* [最新发布版本](/LoveWithRichard.exe)
 * [源代码](/LoveWithRichard.cpp)
+
+点击右上方的历史记录图标可以查看更新记录。
+
+宣传视频：[BV18K4y1x7g9](https://b23.tv/BV18K4y1x7g9)
 
 天府灵山行者的过往作品（较新的在前）:
 

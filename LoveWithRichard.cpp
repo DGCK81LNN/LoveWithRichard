@@ -39,6 +39,18 @@ void gotoxy(int x,int y) {
 void color(unsigned char a = 0x07) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), a);
 }
+/**
+ * @brief 判断一个字符串是否是给定数组中的一项
+ */
+bool inArray(string str, const string *array) {
+    int i = 0;
+    while (array[i] != "") {
+        if (array[i] == str)
+            return true;
+        i++;
+    }
+    return false;
+}
 
 /**
  * @brief 输出文本，识别字体颜色控制。
@@ -47,16 +59,21 @@ void color(unsigned char a = 0x07) {
  */
 void l(string str, string end = "\n\n") {
     color();
-    for (int i = 0; str[i] != '\0'; i++) // 设置字体颜色符
+    for (int i = 0; str[i] != '\0'; i++) // 设置字体颜色符\x11
         if (str[i] == '\x11')
             color((int)str[++i]);
-        else if (str[i] == '\x12') // 重置字体颜色符
+        else if (str[i] == '\x12') // 重置字体颜色符\x12
             color();
         else
             cout << str[i];
     color();
     cout << end;
 }
+
+bool debug = false; // 调试模式是否已开启
+string name; // 当前玩家名
+float lovePoint; // 好感度
+float loveBonus; // 好感度加成倍数
 
 /**
  * @brief 逐字输出文本，识别字体颜色控制。
@@ -65,15 +82,15 @@ void l(string str, string end = "\n\n") {
  */
 void p(string str, string end = "\n\n") {
     color();
-    for (int i = 0; str[i] != '\0'; i++) // 设置字体颜色符
+    for (int i = 0; str[i] != '\0'; i++) // 设置字体颜色符\x11
         if (str[i] == '\x11')
             color(str[++i]);
-        else if (str[i] == '\x12') // 重置字体颜色符
+        else if (str[i] == '\x12') // 重置字体颜色符\x12
             color();
         else {
-            if (str[i] != '\x13') // 延时符
+            if (str[i] != '\x13') // 延时符\x13
                 cout << str[i];
-            if(str[i] != '\x07')
+            if(str[i] != '\x07' && !debug)
                 Sleep(30);
         }
     color();
@@ -88,28 +105,35 @@ void p(string str, string end = "\n\n") {
  */
 void g(string str, string end = "\n\n") {
     color();
-    for (int i = 0; str[i] != '\0'; i++) { // 设置字体颜色符
+    for (int i = 0; str[i] != '\0'; i++) { // 设置字体颜色符\x11
         if (str[i] == '\x11') {
             color((int)str[++i]);
         }
-        else if (str[i] == '\x12') { // 重置字体颜色符
+        else if (str[i] == '\x12') { // 重置字体颜色符\x12
             color();
         }
         else {
-            if (str[i] != '\x13') // 跳过符
+            if (str[i] != '\x13') // 延时符\x13
                 cout << str[i];
-            if(str[i] != '\x07')
+            if(str[i] != '\x07' && !debug)
                 Sleep(30);
         }
     }
     color();
     cout << end;
-    getch();
+    if ((debug || getch() == 'l') && !debug) {
+        int x = wherex(), y = wherey();
+        color(0x08);
+        gotoxy(1, 1);
+        cout << lovePoint << "\a";
+        color();
+        gotoxy(x, y);
+    }
 }
 
 /**
  * @brief 输出分割线
- * @param lovePoint 当前的lovePoint。开局后第一条分割线不要传入此参数。
+ * @param lovePoint 当前的好感度。传入后会显示好感度进度条；如果省略，则显示“按任意键继续”。
  */
 void w(float lovePoint = -10000) {
     system("cls");
@@ -133,11 +157,10 @@ void w(float lovePoint = -10000) {
  * @return 选中项的索引
  */
 unsigned char choices(const string *choiceArr) {
-    char g;
-    unsigned char i = 0;
-    int x = wherex();
-    int y = wherey();
-    unsigned char size = 255;
+    char g; // 存储最近输入的1字节数据
+    unsigned char i = 0; // 当前选中项的索引
+    int x = wherex(), y = wherey(); // 存储选择题开始位置的光标坐标
+    unsigned char size = 255; // 存储选项数组的长度
     for (unsigned char j = 0; j < size; j++) {
         if (choiceArr[j] == "") {
             size = j;
@@ -164,50 +187,17 @@ unsigned char choices(const string *choiceArr) {
                     i = size - 1;
             }
         }
-        else if (g == '\r') {
+        else if (g == 'd') {
+            debug = !debug;
+            cout << (debug ? "\a\a" : "\a");
+        }
+        else if (g == 'l') {
+            int x = wherex(), y = wherey();
+            color(0x08);
+            gotoxy(1, 1);
+            cout << lovePoint << "\a";
             color();
-            l("");
-            return i;
-        }
-    }
-}
-
-/**
- * @brief 显示竖排选择题
- * @param choiceArr 选项数组，用一个空字符串结束
- * @return 选中项的索引
- */
-unsigned char choicesV(const string *choiceArr) {
-    char g;
-    unsigned char i = 0;
-    int x = wherex();
-    int y = wherey();
-    unsigned char size = 255;
-    for (unsigned char j = 0; j < size; j++) {
-        if (choiceArr[j] == "") {
-            size = j;
-            break;
-        }
-        p("\x11\x0f* " + choiceArr[j], "\n"); 
-    }
-    while (true) {
-        gotoxy(x, y);
-        for (unsigned char j = 0; j < size; j++) {
-            color(i == j ? 0x0e : 0x0f);
-            cout << "* " + choiceArr[j] + "\n";
-        }
-        g = getch();
-        if (g == '\xe0') {
-            g = getch();
-            if (g == 'H') {
-                if (i > 0)
-                    i--;
-            }
-            else if (g == 'P') {
-                i++;
-                if (i >= size)
-                    i = size - 1;
-            }
+            gotoxy(x, y);
         }
         else if (g == '\r') {
             color();
@@ -217,6 +207,17 @@ unsigned char choicesV(const string *choiceArr) {
     }
 }
 
+
+const string NAMES_AMANDA[] = {"Amanda", "Lxm", ""}; // 判定为Amanda的名字数组
+const string NAMES_NORA[] = {"Nora", "Wsy", ""}; // 判定为Nora的名字数组
+const string NAMES_SUNNY[] = {"Sunny", "Wxr", "Huuns", ""}; // 判定为Sunny的名字数组
+const string NAMES_SUNNYLIKE[] = {"Ynnus", "Suny", "Rxw", ""}; // 判定为形似Sunny的名字数组
+bool amanda; // 是否已判定为Amanda
+bool nora; // 是否已判定为Nora
+bool sunny; // 是否已判定为Sunny
+bool sunnylike; // 是否已判定为形似Sunny
+
+// 键盘按键列表
 const string CHOICES_KEYBOARD[] = {
     "A", "B", "C", "D", "E", "F", "G",
     "H", "I", "J", "K", "L", "M", "N",
@@ -229,14 +230,13 @@ const string CHOICES_KEYBOARD[] = {
  * @return 选中项的索引
  */
 string keyboard() {
-    cout << endl;
-
-    char g;
-    unsigned char i = 0;
-    int x = wherex(), y = wherey();
-    unsigned char size = 255;
-    unsigned char pos = 0;
-    char n[] = "\0\0\0\0\0\0";
+    char g; // 存储最近输入的1字节数据
+    unsigned char i = 0; // 当前选中按键的索引
+    int x = wherex(), y = wherey(); // 存储键盘开始位置的光标坐标
+    unsigned char size = 255; // 存储键盘按键的数量
+    unsigned char pos = 0; // 存储键盘光标目前在第几个字节上
+    char n[] = "\0\0\0\0\0\0"; // 存储当前已输入的名字
+    unsigned char nameColor; // 存储当前名字的字体颜色，0x0到0xf
     for (unsigned char j = 0; j < size; j++) {
         if (CHOICES_KEYBOARD[j] == "") {
             size = j;
@@ -244,9 +244,21 @@ string keyboard() {
         }
     }
     while (true) {
+        amanda = inArray(n, NAMES_AMANDA),
+        nora = inArray(n, NAMES_NORA),
+        sunny = inArray(n, NAMES_SUNNY),
+        sunnylike = inArray(n, NAMES_SUNNYLIKE);
         gotoxy(x, y);
-        color(0x0f);
-        cout << "\t\t\t     " << n << "      \n\t";
+        nameColor = amanda ? 0xa : nora ? 0xd : sunny ? 0xc : sunnylike ? 0xe : 0xf;
+        color(nameColor); // 低四位为指定颜色，高四位为0
+        cout << "\t\t\t     ";
+        for (unsigned char k = 0; k <= pos && k < 6; k++) { // 每个字母挨个输出
+            if (k == 5 || k == pos) // 当前光标位置
+                color(nameColor << 4); // 低四位为0，高四位为指定颜色
+            cout << n[k]; // 如果光标所在的这一位还是空的，正好输出一个空字符\0代表光标
+        }
+        color();
+        cout << "     \n\t";
         for (unsigned char j = 0; j < size; j++) {
             if (j > 0 && j % 7 == 0)
                 cout << "\n\t";
@@ -271,6 +283,10 @@ string keyboard() {
                     i -= 7;
             else if (g == 'P' && i < size - 7)
                     i += 7;
+        }
+        else if (g == 'd') {
+            debug = !debug;
+            cout << (debug ? "\a\a" : "\a");
         }
         else if (g == '\r')
             if (i == 26) {
@@ -297,6 +313,8 @@ string keyboard() {
 
 int main() {
 
+    system("title Love With Richard v2.0.4");
+
     // 主菜单
 
     const string CHOICES_MAINMENU[] = {"开始", "关于", "退出", ""};
@@ -309,7 +327,7 @@ int main() {
     back:
     switch(choices(CHOICES_MAINMENU)) {
         case 1:
-            p("\t\t\t\x11\x0fLove With Richard \x11\x07 under epidemic\n\n\n\n\t\t原作（Python 3） by:\n\t\t\t\t\x11\x08 学了一点Python的\n\t\t\t\t     \x11\x0eRichard M\x12\n\t\t    （Bilibili \x11\x09@天府灵山行者\x12 , \x11\x09uid300711293\x12）\n\n\n\t\tC++ 翻制 by:\n\t\t\t\t\x11\x08  除了C++啥都会的\n\t\t\t\t       \x11\x0aRoy L\x12\n\t\t      （Bilibili \x11\x09@DGCK81LNN\x12 , \x11\x09uid328066747\x12）\n\t\t\t     \x11\x02（胡说，我根本不会Java");
+            p("\t\t\t\x11\x0fLove With Richard \x11\x07 under epidemic\n\n\n\n\t\t原作（Python 3） by:\n\t\t\t\t\x11\x08 学了一点Python的\n\t\t\t\t     \x11\x0eRichard M\x12\n\t\t    （Bilibili \x11\x09@天府灵山行者\x12 , \x11\x09uid300711293\x12）\n\n\n\t\tC++ 翻制 by:\n\t\t\t\t\x11\x08  除了C++啥都会的\n\t\t\t\t       \x11\x0aRoy L\x12\n\t\t      （Bilibili \x11\x09@DGCK81LNN\x12 , \x11\x09uid328066747\x12）\n\t\t\t     \x11\x02（胡说，我根本不会Java\n\n\n\x11\x08调试功能：在任意选项处按[D]切换调试模式，可以自动跳过对话；在任意处按[L]可在控制台第一行显示当前好感度。");
             choices(CHOICES_BACK);
             goto back;
         case 2:
@@ -318,8 +336,7 @@ int main() {
 
     // 初始化
 
-    string name;
-    float lovePoint = 0, loveBonus;
+    lovePoint = 0; // 好感度
 
     // 输入名字
 
@@ -329,12 +346,22 @@ int main() {
     while (true) {
         name = keyboard();
             l("> " + name + " <");
-        if (name == "Wxr" || name == "Sunny" || name == "Ynnus" ||
-            name == "Suny" || name == "Yuns" || name == "Huuns" || name == "Rxw") {
-            p("\x11\x06我觉得布星");
+        if (sunny) {
+            p("\x11\x0c我觉得布星");
         }
-        else if (name == "Amanda" || name == "Lxm" || name == "Nora" || name == "Wsy") {
-            p("\x11\x02你确定？");
+        else if (sunnylike) {
+            p("\x11\x0e彳亍口巴");
+            if (choices(CHOICES_CONFIRM) == 1)
+                break;
+        }
+        else if (amanda) {
+            p("\x11\x0a你确定？");
+            loveBonus = 1.2;
+            if (choices(CHOICES_CONFIRM) == 1)
+                break;
+        }
+        else if (nora) {
+            p("\x11\x0d你确定？");
             loveBonus = 1.2;
             if (choices(CHOICES_CONFIRM) == 1)
                 break;
@@ -361,7 +388,7 @@ int main() {
     const string CHOICES_START[] = {"我有一道题不会", "你好像不太高兴", "我想和你一起复习", ""};
     const string CHOICES_LOVE_RUSH[] = {"对他表白", "回自己的座位", ""};
     const string CHOICES_LOVE_RUSH_R[] = {"我没有复习材料", "对他表白", "回自己的座位", ""};
-    bool loveRush = false;
+    bool loveRush = false; // 是否贸然表白
 
     g("我一边跟在他后面，一边思考要对他说什么。我和他按照老师的引导进入了七年八班的教室，也就是两年前我们上课的地方。");
     g("他擦了自己的桌椅，然后拿出一本必背古诗文，趴在桌子上看。");
@@ -441,7 +468,7 @@ int main() {
 
     const string CHOICES_FOLLOW[] = {"跟着", "不跟着", ""};
     const string CHOICES_MEMORY[] = {"你都写过什么", "咱们一起回班吧", ""};
-    bool memory = false;
+    bool memory = false; // 是否听Richard讲了关于表白墙的回忆
 
     g("第一节课被统一的广播占了，我感觉自己的心情明显不像网课时那么低落、无力。看着这熟悉又陌生的教室，我自然地回想起了初一时的事情。");
     g("根据和Richard关系比较好的一个男生讲的，他在两年前的这个时候就已经靠近Sunny。那时我还完全在自己的小圈子里。");
@@ -673,8 +700,11 @@ int main() {
         }
         g("“以前放学时，我经常来这里坐。看看晚霞，听听我喜欢的歌，或者盯着放学回家的同学们。Richard，你喜欢在这里做什么？”");
         g("他回答我：“我不经常来这儿。但我还清楚地记得，两年前的早些时候，我在下楼上体育课时路过了这里。”");
-        g("“那一天，我随身携带了一把钢尺，在这用它弹了一小段《恋爱循环》。在我旁边听的有几个女生，其中一个应该是李潇曼。自此之后，我很少来这里。”");
-        g("我趁机给他一个邀约：“以后，我想多带你来这里。下次，我会送你一把钢尺，听听你亲手弹的曲子。”");
+        if (amanda)
+            g("“那一天，我随身携带了一把钢尺，在这用它弹了一小段《恋爱循环》。在我旁边听的有几个女生，你应该也在其列。自此之后，我很少来这里。”");
+        else
+            g("“那一天，我随身携带了一把钢尺，在这用它弹了一小段《恋爱循环》。在我旁边听的有几个女生，其中一个应该是Amanda。自此之后，我很少来这里。”");
+       g("我趁机给他一个邀约：“以后，我想多带你来这里。下次，我会送你一把钢尺，听听你亲手弹的曲子。”");
         g("他答应了：“行。我还想了解一下你是怎么喜欢上我的。你为什么现在才开始追我？”");
         g("“我可以给你说说，但你一会也要告诉我你为什么喜欢Sunny，而且被拒后一直不放弃。”");
         g("“刚入学时，我并没有关注过你。两年前“Sunny事件”发生后，我开始对你有了一丝兴趣。到了初二以后，你的学习成绩开始猛涨，甚至进了年级前十，每次考试你的理科成绩都数一数二。”");
@@ -785,7 +815,7 @@ int main() {
     g("老师给我们进行了疫情防控教育、安全教育，然后收上了个人健康卡。历史老师还拿来了两套卷子作为五一假期的作业。");
     g("老师说可以放学回家后，我立即去找了Richard，对他说：“Richard，去报国亭等一下我，我做完卫生就下来找你，给你一个惊喜。”");
     g("由于五一假期有领导来检查卫生，所以班主任老师让我们多打扫了一会。做完卫生后，我立刻拿书包下了楼，走向报国亭。现在，已经放学约半个小时了，学校里的学生大部分都回家了。");
-    if (lovePoint >= 130) {
+    if (lovePoint >= 130) { // 真爱结局
         g("Richard在报国亭上看着我。我快走到他身前时，他站了起来。我看周围没人，就冲上去，使了很大的力气抱住他。我快把自己挤的窒息了，但他却没什么反应。");
         g("我放开了自己的双臂，然后拉着他坐了下来。他先问了我一句：“你选择保送还是选择中考，打算好了吗？”");
         g("我高兴地回答他：“当然要和你一起了。我最喜欢你了。我猜，你肯定想要保送。因为我感觉到你身上的备考紧迫现象已经完全消失。”");
@@ -801,7 +831,7 @@ int main() {
         w(lovePoint);
         p("\n\x11\x0cTruelove End：第二个Sunny");
     }
-    else if (lovePoint >= 90) {
+    else if (lovePoint >= 90) { // 好结局
         g("Richard在报国亭上看着我。我快走到他身前时，他站了起来。我看周围没人，就冲上去，使了很大的力气抱住他。我快把自己挤的窒息了，但他却没什么反应。");
         g("我放开了自己的双臂，然后拉着他坐了下来。他先问了我一句：“你选择保送还是选择中考，打算好了吗？”");
         g("我高兴地回答他：“当然要和你一起了。我最喜欢你了。我猜，你肯定想要保送。因为我感觉到你身上的备考紧迫现象已经完全消失。”");
@@ -816,7 +846,7 @@ int main() {
         w(lovePoint);
         p("\n\x11\x0dGood End：知心恋人");
     }
-    else if (lovePoint >= 50) {
+    else if (lovePoint >= 50) { // 普通结局
         g("Richard坐在报国亭上，双臂放在腿上，低着头，似乎在思考着什么，并没有考试结束后该有的放松。我走上前去，并坐在了他身边。他先问了我一句：“你选择保送还是选择中考，打算好了吗？”");
         g("我高兴地回答他：“当然要和你一起了。我最喜欢你了。我猜，你肯定想要保送。因为我在初二时听说过你想保送到小外的高中部。”");
         g("他对我说：“是的。我很喜欢小外，也很喜欢这里的生活。现在，疫情给我们的生活带来这么大的影响和威胁，我可不想考到陌生的学校。我也承受不起近三个月的漫长备考。”");
@@ -833,7 +863,7 @@ int main() {
         w(lovePoint);
         p("\n\x11\x0bNormal End：新的伴侣");
     }
-    else {
+    else { // 坏结局
         g("远远看去，报国亭上一个人也没有。我的心一下就紧张了起来。我一边往报国亭走，一边向四处张望，可是周围只有一个不认识的老师经过。");
         g("我问了那位途经这里的老师，他说他工作很忙，也没有看见Richard。我最担心的事情还是发生了，Richard应该是趁我做卫生时逃走了。");
         g("我失望地坐在了寂寥的报国亭上，我期待了这么久，而他就这样离开了我。或许，这就是他的怪异性格。");
@@ -846,13 +876,12 @@ int main() {
         g("我孤身一人走出了校门，上车，回了家。到家后，我又给他发了一次消息，想要把他挽留在我身边。");
         g("他回复了我：“一切都回不去了。”之后，整个五一假期，他都没与我聊天。");
         w(lovePoint);
-        p("\x11\x08\nBad End：永远的回忆"); // “\x08Bad”在我的环境下无法通过编译，特把“\n”移到后面来隔开
+        p("\x11\x08\nBad End：永远的回忆"); // “\x08Bad”在某些环境下无法通过编译，特把“\n”移到后面来隔开
     }
 
     // 结束菜单
 
     const string CHOICES_ENDMENU[] = {"结束", ""};
-
     choices(CHOICES_ENDMENU);
     goto restart;
 }
