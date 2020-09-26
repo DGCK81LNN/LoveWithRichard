@@ -1,4 +1,4 @@
-//encoding: gb18030
+//encoding: gbk
 
 #include<iostream>
 #include<conio.h>
@@ -211,7 +211,7 @@ unsigned char choices(const string *choiceArr) {
 const string NAMES_AMANDA[] = {"Amanda", "Lxm", ""}; // 判定为Amanda的名字数组
 const string NAMES_NORA[] = {"Nora", "Wsy", ""}; // 判定为Nora的名字数组
 const string NAMES_SUNNY[] = {"Sunny", "Wxr", "Huuns", ""}; // 判定为Sunny的名字数组
-const string NAMES_SUNNYLIKE[] = {"Ynnus", "Suny", "Rxw", ""}; // 判定为形似Sunny的名字数组
+const string NAMES_SUNNYLIKE[] = {"Yuuns", "Suny", "Rxw", ""}; // 判定为形似Sunny的名字数组
 bool amanda; // 是否已判定为Amanda
 bool nora; // 是否已判定为Nora
 bool sunny; // 是否已判定为Sunny
