@@ -1,4 +1,6 @@
-**注意：** 本仓库是《Love with Richard》的v0（Python）和 v1（C++）版本；v2（JavaScript）版本目前可以在[灵魂小站首页](https://dgck81lnn.github.io)找到，v3（[Richard Markup](https://dgck81lnn.github.io/blog/2020/12/08/richard_markup.html)）版本尚未公开。另外， __v0版本以后可能会被移除。__
+**注意：** 本仓库是《Love with Richard》的v0（Python）和 v1（C++）版本；v2（JavaScript）版本目前可以在[灵魂小站首页](https://dgck81lnn.github.io)找到。v3版本目前还未开发完成。
+
+2021-1-12：此仓库已归档。v3版本开发完成后，我会更新此README文件，然后再次归档。
 
 # Love With Richard under epidemic
 
